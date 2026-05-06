@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVault — Buy Credits</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1628;--navy-mid:#112240;--gold:#C9A84C;--gold-light:#E8C97A;--cream:#F5F0E8;--white:#FFFFFF;--gray:#8A9AB5;--green:#2ECC71;--border:rgba(255,255,255,0.07)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 36px;height:62px;background:var(--navy-mid);border-bottom:1px solid var(--border)}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold);text-decoration:none;letter-spacing:1px}
+.logo span{color:var(--white)}
+.back{display:flex;align-items:center;gap:5px;color:var(--gray);font-size:13px;text-decoration:none;transition:color .2s}
+.back:hover{color:var(--gold)}
+.page{max-width:840px;margin:0 auto;padding:52px 24px 72px}
+.page-hd{text-align:center;margin-bottom:44px}
+.page-hd h1{font-family:'Playfair Display',serif;font-size:38px;font-weight:900;margin-bottom:9px}
+.page-hd p{color:var(--gray);font-size:15px;line-height:1.6}
+.balance-bar{background:var(--navy-mid);border:1px solid rgba(201,168,76,.18);border-radius:11px;padding:16px 22px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.bb-l{display:flex;align-items:center;gap:10px}
+.bb-icon{font-size:20px}
+.bb-lbl{font-size:12px;color:var(--gray)}
+.bb-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold)}
+.bb-sub{font-size:12px;color:var(--gray)}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:36px}
+.plan{background:var(--navy-mid);border:2px solid var(--border);border-radius:18px;padding:32px 24px 28px;text-align:center;position:relative;transition:border-color .3s,transform .3s}
+.plan:hover{border-color:rgba(201,168,76,.32);transform:translateY(-3px)}
+.plan.featured{border-color:var(--gold);background:linear-gradient(160deg,var(--navy-mid),rgba(201,168,76,.04))}
+.plan.featured:hover{transform:translateY(-3px)}
+.pop-tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 15px;border-radius:50px;white-space:nowrap}
+.plan-name{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);font-weight:600;margin-bottom:14px}
+.plan-price{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;line-height:1}
+.plan-price sup{font-size:17px;color:var(--gold);vertical-align:super}
+.plan-what{font-size:14px;font-weight:600;color:var(--cream);margin:7px 0 3px}
+.plan-tagline{font-size:12px;color:var(--gray);margin-bottom:24px;line-height:1.5}
+.plan-feats{list-style:none;text-align:left;margin-bottom:24px}
+.plan-feats li{font-size:12px;color:var(--cream);padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+.plan-feats li:last-child{border-bottom:none}
+.plan-feats li::before{content:'✓';color:var(--gold);font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px}
+.btn-pay{display:block;width:100%;padding:13px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;text-decoration:none;text-align:center;transition:all .3s;cursor:pointer;border:none}
+.btn-outline{background:transparent;border:1.5px solid rgba(201,168,76,.32);color:var(--gold)}
+.btn-outline:hover{background:rgba(201,168,76,.07)}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:var(--gold-light);box-shadow:0 8px 22px rgba(201,168,76,.26)}
+.how-box{background:var(--navy-mid);border:1px solid var(--border);border-radius:13px;padding:26px 28px;margin-bottom:28px}
+.how-box h3{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:16px}
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.hs{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:9px;padding:14px;text-align:center}
+.hs-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.hs-title{font-size:13px;font-weight:600;color:var(--cream);margin-bottom:3px}
+.hs-desc{font-size:12px;color:var(--gray);line-height:1.5}
+.secure-note{text-align:center;color:var(--gray);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
+.secure-note strong{color:var(--cream)}
+@media(max-width:680px){nav{padding:0 18px}.plans{grid-template-columns:1fr;max-width:340px;margin-left:auto;margin-right:auto}.page{padding:36px 16px 56px}.how-steps{grid-template-columns:1fr}.balance-bar{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/cvault-dashboard.html" class="logo">C<span>Vault</span></a>
+  <a href="/cvault-dashboard.html" class="back">← Back to Dashboard</a>
+</nav>
+
+<div class="page">
+  <div class="page-hd">
+    <h1>Buy Credits</h1>
+    <p>Pay as you go. No subscriptions, no monthly fees.<br>Pay only when you're ready to apply.</p>
+  </div>
+
+  <div class="balance-bar">
+    <div class="bb-l">
+      <div class="bb-icon">💳</div>
+      <div><div class="bb-lbl">Current Balance</div><div class="bb-val" id="balVal">Loading…</div></div>
+    </div>
+    <div class="bb-sub" id="balSub"></div>
+  </div>
+
+  <div class="plans">
+
+    <!-- KES 49 — paste your Paystack link in href -->
+    <div class="plan">
+      <div class="plan-name">Single Use</div>
+      <div class="plan-price"><sup>KES</sup>49</div>
+      <div class="plan-what">1 Application</div>
+      <div class="plan-tagline">One tailored CV + one cover letter</div>
+      <ul class="plan-feats">
+        <li>1 tailored CV</li>
+        <li>1 matching cover letter</li>
+        <li>Word document download (.docx)</li>
+        <li>Credit never expires</li>
+      </ul>
+      <!--
+        PASTE YOUR PAYSTACK KES 49 PAYMENT LINK IN href BELOW
+        e.g. href="https://paystack.com/pay/cvault-single"
+        Paystack callback URL must be set to:
+        https://your-render-url.onrender.com/cvault-payment-success.html
+      -->
+      <a href="https://paystack.shop/pay/pcxm8e88f2"
+         class="btn-pay btn-outline"
+         onclick="savePurchase('single')">
+        Pay KES 49 →
+      </a>
+    </div>
+
+    <!-- KES 99 — paste your Paystack link in href -->
+    <div class="plan featured">
+      <div class="pop-tag">Best Value</div>
+      <div class="plan-name">Triple Pack</div>
+      <div class="plan-price"><sup>KES</sup>99</div>
+      <div class="plan-what">3 Applications</div>
+      <div class="plan-tagline">KES 33 per application — save 33%</div>
+      <ul class="plan-feats">
+        <li>3 tailored CVs</li>
+        <li>3 matching cover letters</li>
+        <li>Word document downloads (.docx)</li>
+        <li>Credits never expire</li>
+        <li>Save 33% vs single use</li>
+      </ul>
+      <!--
+        PASTE YOUR PAYSTACK KES 99 PAYMENT LINK IN href BELOW
+        e.g. href="https://paystack.com/pay/cvault-triple"
+      -->
+      <a href="https://paystack.shop/pay/6fjdv8zm65"
+         class="btn-pay btn-gold"
+         onclick="savePurchase('triple')">
+        Pay KES 99 →
+      </a>
+    </div>
+
+    <!-- KES 199 — paste your Paystack link in href -->
+    <div class="plan">
+      <div class="plan-name">Day Pass</div>
+      <div class="plan-price"><sup>KES</sup>199</div>
+      <div class="plan-what">Unlimited · 24 Hours</div>
+      <div class="plan-tagline">Apply to as many jobs as you want today</div>
+      <ul class="plan-feats">
+        <li>Unlimited tailored CVs</li>
+        <li>Unlimited cover letters</li>
+        <li>Word document downloads (.docx)</li>
+        <li>24 hours from time of payment</li>
+        <li>Best for mass applications</li>
+      </ul>
+      <!--
+        PASTE YOUR PAYSTACK KES 199 PAYMENT LINK IN href BELOW
+        e.g. href="https://paystack.com/pay/cvault-daypass"
+      -->
+      <a href="https://paystack.shop/pay/0w9dv793nj"
+         class="btn-pay btn-outline"
+         onclick="savePurchase('unlimited')">
+        Pay KES 199 →
+      </a>
+    </div>
+
+  </div>
+
+  <div class="how-box">
+    <h3>How Credits Work</h3>
+    <div class="how-steps">
+      <div class="hs"><div class="hs-num">1</div><div class="hs-title">Pay via Paystack</div><div class="hs-desc">M-Pesa, Visa & Mastercard accepted</div></div>
+      <div class="hs"><div class="hs-num">2</div><div class="hs-title">Credits added instantly</div><div class="hs-desc">Balance updates the moment payment confirms</div></div>
+      <div class="hs"><div class="hs-num">3</div><div class="hs-title">Use when ready</div><div class="hs-desc">Single & triple credits never expire. Day pass lasts 24 hours.</div></div>
+    </div>
+  </div>
+
+  <div class="secure-note">🔒 Payments processed by <strong>Paystack</strong> — M-Pesa, Visa & Mastercard accepted</div>
+</div>
+
+<script>
+const API = '';
+const token = localStorage.getItem('cvault_token');
+if (!token) { window.location.href = '/cvault-login.html'; }
+
+// Load and display current credits
+async function loadCredits() {
+  try {
+    const res = await fetch(`${API}/api/payments/credits`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.status === 401) { window.location.href = '/cvault-login.html'; return; }
+    if (!res.ok) return;
+    const c = await res.json();
+    localStorage.setItem('cvault_credits', JSON.stringify(c));
+
+    const now = new Date();
+    const unlimited = c.unlimited_until && new Date(c.unlimited_until) > now;
+    const total = c.single_credits + c.triple_credits * 3;
+
+    if (unlimited) {
+      document.getElementById('balVal').textContent = 'Unlimited (active)';
+      document.getElementById('balSub').textContent = 'Day pass expires ' + new Date(c.unlimited_until).toLocaleTimeString('en-KE', {hour:'2-digit',minute:'2-digit'});
+    } else {
+      document.getElementById('balVal').textContent = total + ' credit' + (total !== 1 ? 's' : '');
+      document.getElementById('balSub').textContent = total > 0 ? 'Ready to use' : 'Top up below to start tailoring';
+    }
+  } catch(e) {
+    document.getElementById('balVal').textContent = '—';
+  }
+}
+
+// Save purchase intent before redirecting to Paystack
+// Paystack will redirect back to /cvault-payment-success.html?reference=XXX
+function savePurchase(type) {
+  localStorage.setItem('cvault_pending_purchase', type);
+}
+
+loadCredits();
+</script>
+</body>
+</html>

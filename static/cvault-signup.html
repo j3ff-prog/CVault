@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVault — Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1628;--navy-mid:#112240;--gold:#C9A84C;--gold-light:#E8C97A;--cream:#F5F0E8;--white:#FFFFFF;--gray:#8A9AB5;--red:#E55C5C;--green:#2ECC71}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;display:flex}
+.left{width:44%;background:var(--navy-mid);border-right:1px solid rgba(201,168,76,.15);display:flex;flex-direction:column;justify-content:space-between;padding:52px;position:relative;overflow:hidden;flex-shrink:0}
+.left::before{content:'';position:absolute;top:-180px;right:-180px;width:420px;height:420px;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.left::after{content:'';position:absolute;bottom:-80px;left:-80px;width:280px;height:280px;background:radial-gradient(circle,rgba(201,168,76,.04) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--gold);text-decoration:none;letter-spacing:1px;display:inline-block;position:relative;z-index:2}
+.logo span{color:var(--white)}
+.panel-mid{position:relative;z-index:2}
+.panel-mid h2{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;line-height:1.1;margin-bottom:14px}
+.panel-mid h2 em{color:var(--gold);font-style:italic;display:block}
+.panel-mid p{color:var(--gray);font-size:14px;line-height:1.7;font-weight:300;max-width:300px}
+.trust-list{list-style:none;position:relative;z-index:2}
+.trust-list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px;color:var(--cream)}
+.trust-list li:last-child{border-bottom:none}
+.ti{width:38px;height:38px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ttext small{display:block;font-size:11px;color:var(--gray);margin-top:1px}
+.right{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 52px;overflow-y:auto}
+.form-box{width:100%;max-width:420px;animation:fadeUp .4s ease both}
+.form-top{margin-bottom:26px}
+.form-top h2{font-family:'Playfair Display',serif;font-size:25px;font-weight:700;margin-bottom:6px}
+.form-top p{color:var(--gray);font-size:14px}
+.form-top a{color:var(--gold);text-decoration:none;font-weight:500}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{margin-bottom:15px}
+.fg label{display:block;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--cream);margin-bottom:6px}
+.fg input{width:100%;padding:12px 15px;background:rgba(17,34,64,.9);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.fg input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.fg input::placeholder{color:var(--gray)}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px}
+.pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gray);cursor:pointer;font-size:15px;padding:4px;line-height:1;transition:color .2s}
+.pw-eye:hover{color:var(--gold)}
+.strength-bar{margin-top:6px;height:3px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden}
+.strength-fill{height:100%;border-radius:3px;width:0;transition:width .3s,background .3s}
+.terms-row{display:flex;align-items:flex-start;gap:9px;margin-bottom:20px}
+.terms-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--gold);flex-shrink:0;margin-top:3px;cursor:pointer}
+.terms-row label{font-size:13px;color:var(--gray);line-height:1.5;cursor:pointer}
+.terms-row a{color:var(--gold);text-decoration:none}
+.err-msg{background:rgba(229,92,92,.1);border:1px solid rgba(229,92,92,.3);color:var(--red);padding:10px 13px;border-radius:7px;font-size:13px;margin-bottom:16px;display:none}
+.btn-main{width:100%;padding:14px;background:var(--gold);color:var(--navy);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-main:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.26)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.left{display:none}.right{padding:32px 20px}}
+</style>
+</head>
+<body>
+<div class="left">
+  <a href="/" class="logo">C<span>Vault</span></a>
+  <div class="panel-mid">
+    <h2>Land More<em>Interviews.</em></h2>
+    <p>Your CV tailored to every job description. Pay as you go — no subscriptions, no monthly fees.</p>
+  </div>
+  <ul class="trust-list">
+    <li><div class="ti">📄</div><div class="ttext">Tailored CV + Cover Letter<small>Matched to the exact job description</small></div></li>
+    <li><div class="ti">⬇️</div><div class="ttext">Download as Word document<small>Formatted and ready to send</small></div></li>
+    <li><div class="ti">💳</div><div class="ttext">Pay via M-Pesa — from KES 49<small>No card needed. No subscription.</small></div></li>
+  </ul>
+</div>
+<div class="right">
+  <div class="form-box">
+    <div class="form-top">
+      <h2>Create Your Account</h2>
+      <p>Already have an account? <a href="/cvault-login.html">Log in →</a></p>
+    </div>
+    <div class="err-msg" id="err"></div>
+    <div class="row2">
+      <div class="fg"><label>First Name</label><input type="text" id="fn" placeholder="John" autocomplete="given-name" /></div>
+      <div class="fg"><label>Last Name</label><input type="text" id="ln" placeholder="Kamau" autocomplete="family-name" /></div>
+    </div>
+    <div class="fg"><label>Email Address</label><input type="email" id="em" placeholder="you@email.com" autocomplete="email" /></div>
+    <div class="fg"><label>Phone Number</label><input type="tel" id="ph" placeholder="07XX XXX XXX" autocomplete="tel" /></div>
+    <div class="fg">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="pw" placeholder="At least 8 characters" autocomplete="new-password" oninput="checkStrength(this.value)" />
+        <button class="pw-eye" type="button" onclick="togglePw('pw',this)">👁</button>
+      </div>
+      <div class="strength-bar"><div class="strength-fill" id="sf"></div></div>
+    </div>
+    <div class="fg">
+      <label>Confirm Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="pw2" placeholder="Repeat your password" autocomplete="new-password" />
+        <button class="pw-eye" type="button" onclick="togglePw('pw2',this)">👁</button>
+      </div>
+    </div>
+    <div class="terms-row">
+      <input type="checkbox" id="tc" />
+      <label for="tc">I agree to CVault's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+    </div>
+    <button class="btn-main" id="submitBtn" onclick="signup()">Create My Account →</button>
+  </div>
+</div>
+<script>
+const API = '';  // empty = same server (works both locally and on Render)
+
+function togglePw(id,btn){const el=document.getElementById(id);el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🙈'}
+function checkStrength(v){const f=document.getElementById('sf');let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;f.style.width=['0%','30%','55%','80%','100%'][s];f.style.background=['','#E55C5C','#E5A55C','#C9A84C','#2ECC71'][s]}
+function showErr(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'nearest'})}
+
+async function signup(){
+  document.getElementById('err').style.display='none';
+  const fn=document.getElementById('fn').value.trim();
+  const ln=document.getElementById('ln').value.trim();
+  const em=document.getElementById('em').value.trim();
+  const ph=document.getElementById('ph').value.trim();
+  const pw=document.getElementById('pw').value;
+  const pw2=document.getElementById('pw2').value;
+  const tc=document.getElementById('tc').checked;
+  if(!fn||!ln)return showErr('Please enter your first and last name.');
+  if(!em||!em.includes('@'))return showErr('Please enter a valid email address.');
+  if(!ph||ph.replace(/\D/g,'').length<9)return showErr('Please enter a valid phone number.');
+  if(pw.length<8)return showErr('Password must be at least 8 characters.');
+  if(pw!==pw2)return showErr('Passwords do not match.');
+  if(!tc)return showErr('Please accept the Terms of Service to continue.');
+
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.textContent='Creating account…';
+
+  try {
+    const res = await fetch(`${API}/api/auth/signup`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({firstName:fn, lastName:ln, email:em, phone:ph, password:pw})
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showErr(data.error || 'Signup failed. Please try again.');
+      btn.disabled=false; btn.textContent='Create My Account →';
+      return;
+    }
+    // Save to localStorage
+    localStorage.setItem('cvault_token', data.token);
+    localStorage.setItem('cvault_user', JSON.stringify(data.user));
+    localStorage.setItem('cvault_credits', JSON.stringify(data.credits));
+    window.location.href = '/cvault-dashboard.html';
+  } catch(e) {
+    showErr('Network error. Please check your connection and try again.');
+    btn.disabled=false; btn.textContent='Create My Account →';
+  }
+}
+</script>
+</body>
+</html>

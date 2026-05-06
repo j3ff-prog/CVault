@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVault — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1628;--navy-mid:#112240;--gold:#C9A84C;--gold-light:#E8C97A;--cream:#F5F0E8;--white:#FFFFFF;--gray:#8A9AB5;--red:#E55C5C;--green:#2ECC71;--border:rgba(255,255,255,0.07)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh}
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:0 36px;height:62px;background:var(--navy-mid);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold);text-decoration:none;letter-spacing:1px}
+.logo span{color:var(--white)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.credits-chip{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--gold-light);font-size:12px;font-weight:600;padding:6px 14px;border-radius:50px;cursor:pointer;text-decoration:none;transition:background .2s}
+.credits-chip:hover{background:rgba(201,168,76,.18)}
+.avatar-wrap{position:relative}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);cursor:pointer;border:none}
+.dropdown{position:absolute;top:calc(100% + 10px);right:0;background:var(--navy-mid);border:1px solid var(--border);border-radius:12px;padding:8px;min-width:192px;box-shadow:0 16px 48px rgba(0,0,0,.4);display:none;z-index:200}
+.dropdown.open{display:block}
+.dd-head{padding:10px 12px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.dd-name{font-size:14px;font-weight:600}
+.dd-email{font-size:12px;color:var(--gray);margin-top:2px}
+.dd-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:7px;font-size:13px;color:var(--cream);text-decoration:none;cursor:pointer;transition:background .15s;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif}
+.dd-item:hover{background:rgba(255,255,255,.05)}
+.dd-item.red{color:var(--red)}
+.dd-icon{font-size:15px;width:18px;text-align:center}
+.layout{display:grid;grid-template-columns:228px 1fr;min-height:calc(100vh - 62px)}
+.sidebar{background:var(--navy-mid);border-right:1px solid var(--border);padding:24px 12px;display:flex;flex-direction:column;gap:2px}
+.sb-sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);padding:0 10px;margin-top:18px;margin-bottom:6px}
+.sb-sec:first-child{margin-top:0}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:13px;color:var(--gray);text-decoration:none;cursor:pointer;transition:all .15s;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif}
+.sb-item:hover{background:rgba(255,255,255,.04);color:var(--cream)}
+.sb-item.active{background:rgba(201,168,76,.09);color:var(--gold-light);border:1px solid rgba(201,168,76,.14)}
+.sb-icon{font-size:16px;width:20px;text-align:center}
+.main{padding:32px 36px;overflow-y:auto}
+.welcome{background:linear-gradient(135deg,var(--navy-mid),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.16);border-radius:14px;padding:28px 32px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;position:relative;overflow:hidden}
+.welcome::after{content:'✦';position:absolute;right:28px;top:50%;transform:translateY(-50%);font-size:110px;color:rgba(201,168,76,.04);pointer-events:none}
+.welcome h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:5px}
+.welcome h1 span{color:var(--gold)}
+.welcome p{color:var(--gray);font-size:14px;font-weight:300}
+.welcome p strong{color:var(--cream)}
+.btn-new{display:inline-flex;align-items:center;gap:7px;background:var(--gold);color:var(--navy);padding:13px 24px;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .3s;flex-shrink:0;white-space:nowrap}
+.btn-new:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.26)}
+.credits-grid{display:grid;grid-template-columns:1fr 2fr;gap:18px;margin-bottom:28px}
+.box{background:var(--navy-mid);border:1px solid var(--border);border-radius:13px;padding:24px}
+.box-title{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--gray);margin-bottom:18px}
+.balance-big{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;line-height:1;margin-bottom:5px}
+.balance-sub{font-size:13px;color:var(--gray)}
+.topup-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;margin-top:16px;padding:11px;background:rgba(201,168,76,.09);border:1.5px solid rgba(201,168,76,.25);color:var(--gold);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.topup-btn:hover{background:rgba(201,168,76,.16)}
+.credit-rows{display:flex;flex-direction:column;gap:10px}
+.credit-row{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
+.cr-left{display:flex;align-items:center;gap:10px}
+.cr-icon{font-size:17px}
+.cr-name{font-size:13px;font-weight:500}
+.cr-desc{font-size:11px;color:var(--gray);margin-top:1px}
+.cr-count{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)}
+.cr-count.empty{color:rgba(255,255,255,.2);font-size:16px}
+.cr-count.unlimited{color:var(--green);font-size:14px;font-weight:600}
+.cr-count.low{color:var(--red)}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.stat-box{background:var(--navy-mid);border:1px solid var(--border);border-radius:12px;padding:20px 22px}
+.stat-lbl{font-size:11px;color:var(--gray);letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase;font-weight:600}
+.stat-val{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;margin-bottom:3px}
+.stat-sub{font-size:12px;color:var(--gray)}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-head h2{font-family:'Playfair Display',serif;font-size:19px;font-weight:700}
+.empty-hist{background:var(--navy-mid);border:1px solid var(--border);border-radius:12px;padding:48px;text-align:center}
+.eh-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+.eh-p{color:var(--gray);font-size:14px;line-height:1.6}
+.hist-table{background:var(--navy-mid);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.hist-table table{width:100%;border-collapse:collapse}
+.hist-table th{text-align:left;padding:12px 20px;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gray);border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+.hist-table td{padding:15px 20px;font-size:13px;color:var(--cream);border-bottom:1px solid rgba(255,255,255,.04)}
+.hist-table tr:last-child td{border-bottom:none}
+.hist-table tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:50px}
+.badge-cv{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--gold-light)}
+.badge-cl{background:rgba(46,204,113,.07);border:1px solid rgba(46,204,113,.18);color:#7FD4A0}
+.act-link{color:var(--gold);font-size:12px;text-decoration:none;font-weight:500}
+.act-link:hover{text-decoration:underline}
+.loading-row{text-align:center;padding:40px;color:var(--gray);font-size:14px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{display:none}.main{padding:20px 16px}.credits-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.welcome{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="/cvault-dashboard.html" class="logo">C<span>Vault</span></a>
+  <div class="nav-right">
+    <a href="/cvault-payment.html" class="credits-chip" id="creditsChip">Loading…</a>
+    <div class="avatar-wrap">
+      <button class="avatar" id="avatarBtn">?</button>
+      <div class="dropdown" id="dropdown">
+        <div class="dd-head">
+          <div class="dd-name" id="ddName">—</div>
+          <div class="dd-email" id="ddEmail">—</div>
+        </div>
+        <a href="/cvault-dashboard.html" class="dd-item"><span class="dd-icon">🏠</span> Dashboard</a>
+        <a href="/cvault-analysis.html" class="dd-item"><span class="dd-icon">✨</span> New Application</a>
+        <a href="/cvault-payment.html" class="dd-item"><span class="dd-icon">💳</span> Buy Credits</a>
+        <button class="dd-item red" onclick="logout()"><span class="dd-icon">🚪</span> Log Out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-sec">Menu</div>
+    <a href="/cvault-dashboard.html" class="sb-item active"><span class="sb-icon">🏠</span> Dashboard</a>
+    <a href="/cvault-analysis.html" class="sb-item"><span class="sb-icon">✨</span> New Application</a>
+    <div class="sb-sec">Account</div>
+    <a href="/cvault-payment.html" class="sb-item"><span class="sb-icon">💳</span> Buy Credits</a>
+    <button class="sb-item" style="color:var(--red)" onclick="logout()"><span class="sb-icon">🚪</span> Log Out</button>
+  </aside>
+
+  <main class="main">
+    <div class="welcome">
+      <div>
+        <h1>Welcome back, <span id="firstName">there</span>.</h1>
+        <p>You have <strong id="creditSummary">loading…</strong>. Top up anytime — from just KES 49.</p>
+      </div>
+      <a href="/cvault-analysis.html" class="btn-new">✨ New Application →</a>
+    </div>
+
+    <div class="credits-grid">
+      <div class="box">
+        <div class="box-title">Your Balance</div>
+        <div class="balance-big" id="balanceBig">—</div>
+        <div class="balance-sub" id="balanceSub">Loading…</div>
+        <a href="/cvault-payment.html" class="topup-btn">💳 Buy Credits →</a>
+      </div>
+      <div class="box">
+        <div class="box-title">Credit Breakdown</div>
+        <div class="credit-rows">
+          <div class="credit-row">
+            <div class="cr-left"><div class="cr-icon">📄</div><div><div class="cr-name">Single Use</div><div class="cr-desc">1 tailored CV + cover letter</div></div></div>
+            <div class="cr-count empty" id="singleCount">—</div>
+          </div>
+          <div class="credit-row">
+            <div class="cr-left"><div class="cr-icon">🔄</div><div><div class="cr-name">Triple Pack</div><div class="cr-desc">3 tailored CVs + cover letters</div></div></div>
+            <div class="cr-count empty" id="tripleCount">—</div>
+          </div>
+          <div class="credit-row">
+            <div class="cr-left"><div class="cr-icon">♾️</div><div><div class="cr-name">Day Pass</div><div class="cr-desc">Unlimited for 24 hours</div></div></div>
+            <div class="cr-count empty" id="unlimitedStatus">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-lbl">Applications</div><div class="stat-val" id="statApps">—</div><div class="stat-sub">Total CVs tailored</div></div>
+      <div class="stat-box"><div class="stat-lbl">Cover Letters</div><div class="stat-val" id="statCL">—</div><div class="stat-sub">Generated so far</div></div>
+      <div class="stat-box"><div class="stat-lbl">Avg. Match Score</div><div class="stat-val" id="statScore">—</div><div class="stat-sub">Job description alignment</div></div>
+    </div>
+
+    <div class="sec-head"><h2>Recent Applications</h2></div>
+    <div id="historyArea"><div class="loading-row">Loading…</div></div>
+  </main>
+</div>
+
+<script>
+const API = '';
+const token = localStorage.getItem('cvault_token');
+if (!token) { window.location.href = '/cvault-login.html'; }
+
+const user = JSON.parse(localStorage.getItem('cvault_user') || '{}');
+
+// Populate user info immediately from localStorage (fast)
+if (user.firstName) {
+  document.getElementById('firstName').textContent = user.firstName;
+  document.getElementById('avatarBtn').textContent = (user.firstName[0] + (user.lastName?.[0] || '')).toUpperCase();
+  document.getElementById('ddName').textContent = (user.firstName + ' ' + (user.lastName || '')).trim();
+}
+if (user.email) document.getElementById('ddEmail').textContent = user.email;
+
+// Dropdown
+document.getElementById('avatarBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('dropdown').classList.toggle('open');
+});
+document.addEventListener('click', () => document.getElementById('dropdown').classList.remove('open'));
+
+function logout() {
+  localStorage.clear();
+  window.location.href = '/cvault-login.html';
+}
+
+// ── Render credits ──────────────────────────────────────────────────────
+function renderCredits(c) {
+  if (!c) return;
+  const now = new Date();
+  const unlimited = c.unlimited_until && new Date(c.unlimited_until) > now;
+  const total = c.single_credits + c.triple_credits * 3;
+
+  if (unlimited) {
+    document.getElementById('balanceBig').textContent = '∞';
+    document.getElementById('balanceSub').textContent = 'Unlimited access is active';
+    document.getElementById('creditsChip').textContent = '∞ unlimited · Top up';
+    document.getElementById('creditSummary').textContent = 'an active day pass';
+  } else {
+    document.getElementById('balanceBig').textContent = total;
+    document.getElementById('balanceSub').textContent = total > 0 ? 'Credits ready to use' : 'Top up to start tailoring';
+    document.getElementById('creditsChip').textContent = total + ' credit' + (total !== 1 ? 's' : '') + ' · Top up';
+    document.getElementById('creditSummary').textContent = total + ' credit' + (total !== 1 ? 's' : '');
+  }
+
+  const sc = document.getElementById('singleCount');
+  sc.textContent = c.single_credits;
+  sc.className = 'cr-count' + (c.single_credits === 0 ? ' empty' : c.single_credits === 1 ? ' low' : '');
+
+  const tc = document.getElementById('tripleCount');
+  tc.textContent = c.triple_credits;
+  tc.className = 'cr-count' + (c.triple_credits === 0 ? ' empty' : '');
+
+  const us = document.getElementById('unlimitedStatus');
+  if (unlimited) {
+    const exp = new Date(c.unlimited_until);
+    us.textContent = 'Expires ' + exp.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+    us.className = 'cr-count unlimited';
+  } else {
+    us.textContent = '—';
+    us.className = 'cr-count empty';
+  }
+}
+
+// Load from localStorage first (instant display)
+renderCredits(JSON.parse(localStorage.getItem('cvault_credits') || 'null'));
+
+// ── Fetch fresh data from API ───────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    // Fetch credits (also refreshes owner unlimited)
+    const cRes = await fetch(`${API}/api/payments/credits`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (cRes.status === 401) { logout(); return; }
+    if (cRes.ok) {
+      const credits = await cRes.json();
+      localStorage.setItem('cvault_credits', JSON.stringify(credits));
+      renderCredits(credits);
+    }
+
+    // Fetch stats
+    const sRes = await fetch(`${API}/api/user/stats`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (sRes.ok) {
+      const stats = await sRes.json();
+      document.getElementById('statApps').textContent = stats.totalApplications;
+      document.getElementById('statCL').textContent = stats.coverLettersGenerated;
+      document.getElementById('statScore').textContent = stats.averageMatchScore ? stats.averageMatchScore + '%' : '—';
+    }
+
+    // Fetch history
+    const hRes = await fetch(`${API}/api/user/history`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (hRes.ok) {
+      const hData = await hRes.json();
+      renderHistory(hData.applications || []);
+    }
+  } catch(e) {
+    console.error('Dashboard load error:', e);
+  }
+}
+
+function renderHistory(apps) {
+  const ha = document.getElementById('historyArea');
+  if (!apps.length) {
+    ha.innerHTML = `<div class="empty-hist"><div class="eh-icon">📋</div><p class="eh-p">No applications yet.<br>Click <strong style="color:var(--cream)">New Application</strong> to tailor your first CV.</p></div>`;
+    return;
+  }
+  const rows = apps.map(h => `
+    <tr>
+      <td>${h.jobTitle || '—'}</td>
+      <td>${h.company || '—'}</td>
+      <td><span class="badge badge-cv">📄 CV</span> <span class="badge badge-cl">✉️ CL</span></td>
+      <td style="color:var(--gold)">${h.matchScore ? h.matchScore + '%' : '—'}</td>
+      <td>${new Date(h.createdAt).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td><a href="/cvault-analysis.html" class="act-link">Re-run →</a></td>
+    </tr>`).join('');
+  ha.innerHTML = `<div class="hist-table"><table><thead><tr><th>Job Title</th><th>Company</th><th>Documents</th><th>Match</th><th>Date</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

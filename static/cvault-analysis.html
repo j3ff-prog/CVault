@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVault — Tailor My CV</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<style>
+:root{
+  --navy:#0A1628;--navy-mid:#112240;--navy-light:#1A3258;
+  --gold:#C9A84C;--gold-light:#E8C97A;
+  --cream:#F5F0E8;--white:#FFFFFF;--gray:#8A9AB5;
+  --red:#E55C5C;--green:#2ECC71;
+  --border:rgba(255,255,255,0.07);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);display:flex;flex-direction:column}
+
+/* ── NAV ── */
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;background:var(--navy-mid);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold);text-decoration:none;letter-spacing:1px}
+.logo span{color:var(--white)}
+.nav-mid{display:flex;align-items:center;gap:5px;font-size:12px}
+.ns{padding:4px 12px;border-radius:50px;background:rgba(255,255,255,.04);color:var(--gray);white-space:nowrap}
+.ns.active{background:rgba(201,168,76,.1);color:var(--gold-light)}
+.ns.done{background:rgba(46,204,113,.08);color:#7FD4A0}
+.nav-arrow{color:rgba(255,255,255,.15);font-size:14px}
+.nav-right{display:flex;align-items:center;gap:10px}
+.credits-chip{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--gold-light);font-size:12px;font-weight:600;padding:5px 12px;border-radius:50px;text-decoration:none;transition:background .2s;white-space:nowrap;cursor:pointer}
+.credits-chip:hover{background:rgba(201,168,76,.18)}
+.credits-chip.warn{background:rgba(229,92,92,.08);border-color:rgba(229,92,92,.25);color:#F08080}
+.back-link{font-size:13px;color:var(--gray);text-decoration:none}
+.back-link:hover{color:var(--cream)}
+
+/* ── WORKSPACE ── */
+.workspace{display:grid;grid-template-columns:390px 1fr;flex:1;overflow:hidden;min-height:0}
+
+/* ═══════════════════
+   LEFT PANEL
+═══════════════════ */
+.lp{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.lp-head{padding:18px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.lp-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:3px}
+.lp-sub{font-size:12px;color:var(--gray)}
+.lp-body{flex:1;overflow-y:auto;padding:18px 22px}
+.lp-body::-webkit-scrollbar{width:3px}
+.lp-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
+
+.step-block{margin-bottom:20px}
+.step-lbl{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.step-lbl span{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--cream)}
+.sn{width:20px;height:20px;border-radius:50%;background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .25s}
+.sn.done{background:var(--green)}
+
+/* Upload zone */
+.upload-zone{border:2px dashed rgba(255,255,255,.12);border-radius:10px;padding:22px 16px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:rgba(255,255,255,.01)}
+.upload-zone:hover,.upload-zone.over{border-color:var(--gold);background:rgba(201,168,76,.03)}
+.upload-zone.has-file{border-color:var(--green);border-style:solid;background:rgba(46,204,113,.03)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-icon{font-size:26px;margin-bottom:7px}
+.uz-text{font-size:13px;font-weight:500;margin-bottom:2px}
+.uz-sub{font-size:11px;color:var(--gray)}
+.uz-link{color:var(--gold);cursor:pointer;text-decoration:underline}
+.file-pill{display:none;align-items:center;gap:8px;margin-top:9px;background:rgba(46,204,113,.07);border:1px solid rgba(46,204,113,.18);border-radius:7px;padding:8px 11px}
+.file-pill.show{display:flex}
+.fp-name{font-size:12px;color:var(--green);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-rm{background:none;border:none;color:var(--gray);cursor:pointer;font-size:17px;line-height:1;padding:0;flex-shrink:0;transition:color .2s}
+.fp-rm:hover{color:var(--red)}
+.paste-toggle{text-align:center;margin:8px 0 0;font-size:11px;color:var(--gray)}
+.paste-toggle button{background:none;border:none;color:var(--gold);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;text-decoration:underline}
+
+textarea{width:100%;padding:11px 13px;background:rgba(17,34,64,.9);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.65;resize:vertical;outline:none;transition:border-color .2s}
+textarea:focus{border-color:var(--gold)}
+textarea::placeholder{color:var(--gray)}
+.char-hint{font-size:10px;color:var(--gray);text-align:right;margin-top:3px}
+
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* Output toggles */
+.out-toggles{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ot{display:flex;align-items:center;gap:6px;padding:10px 12px;border-radius:7px;border:1px solid var(--border);background:rgba(255,255,255,.02);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--gray);transition:all .2s}
+.ot.active{border-color:rgba(201,168,76,.32);background:rgba(201,168,76,.07);color:var(--cream)}
+.ot-icon{font-size:15px}
+
+/* Footer */
+.lp-foot{padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0}
+.no-cred-warn{background:rgba(229,92,92,.07);border:1px solid rgba(229,92,92,.2);color:#F08080;padding:9px 12px;border-radius:7px;font-size:12px;line-height:1.5;margin-bottom:10px;display:none}
+.no-cred-warn a{color:var(--gold);text-decoration:none;font-weight:600}
+.btn-gen{width:100%;padding:13px;background:var(--gold);color:var(--navy);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-gen:hover:not(:disabled){background:var(--gold-light);box-shadow:0 6px 22px rgba(201,168,76,.25)}
+.btn-gen:disabled{opacity:.42;cursor:not-allowed}
+
+/* ═══════════════════
+   RIGHT PANEL
+═══════════════════ */
+.rp{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.rp-head{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px}
+.tab-row{display:flex;gap:3px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px;flex-shrink:0}
+.tab{padding:6px 16px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;color:var(--gray);border:none;background:transparent;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.tab.active{background:var(--gold);color:var(--navy);font-weight:700}
+.rp-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.act-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.act-btn:hover:not(:disabled){border-color:rgba(201,168,76,.3);color:var(--gold)}
+.act-btn:disabled{opacity:.35;cursor:not-allowed}
+.act-btn.primary{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:700}
+.act-btn.primary:hover:not(:disabled){background:var(--gold-light)}
+
+.rp-body{flex:1;overflow-y:auto;padding:24px;position:relative}
+.rp-body::-webkit-scrollbar{width:3px}
+.rp-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
+
+/* States */
+.state{display:none;height:100%;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+.state.show{display:flex}
+.es-icon{font-size:48px;margin-bottom:14px;opacity:.35}
+.es-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:7px;opacity:.6}
+.es-sub{color:var(--gray);font-size:13px;line-height:1.7;max-width:260px}
+
+/* Loading */
+.spin-ring{width:52px;height:52px;border-radius:50%;border:3px solid rgba(201,168,76,.15);border-top-color:var(--gold);animation:spin 1s linear infinite;margin-bottom:20px;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-title{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:7px}
+.ld-msg{color:var(--gray);font-size:13px;animation:fade 1.5s ease-in-out infinite}
+@keyframes fade{0%,100%{opacity:.4}50%{opacity:1}}
+.ld-steps{margin-top:20px;display:flex;flex-direction:column;gap:8px;text-align:left;max-width:280px;width:100%}
+.ld-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray);animation:slideIn .3s ease both}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+
+/* No credits gate */
+.gate{background:var(--navy-mid);border:2px dashed rgba(229,92,92,.22);border-radius:12px;padding:40px 32px;text-align:center;width:100%;max-width:400px}
+.gate-icon{font-size:38px;margin-bottom:12px}
+.gate-title{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:7px}
+.gate-sub{color:var(--gray);font-size:13px;line-height:1.6;margin-bottom:22px}
+.btn-topup{display:inline-block;padding:12px 28px;background:var(--gold);color:var(--navy);border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;transition:all .3s}
+.btn-topup:hover{background:var(--gold-light)}
+
+/* Error */
+.err-banner{background:rgba(229,92,92,.08);border:1px solid rgba(229,92,92,.22);border-radius:10px;padding:16px 18px;color:#F08080;font-size:13px;line-height:1.6;max-width:420px;text-align:left}
+.err-banner strong{display:block;margin-bottom:6px;font-size:14px}
+.err-retry{margin-top:12px;background:var(--gold);color:var(--navy);border:none;padding:8px 18px;border-radius:6px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px}
+
+/* Output panes */
+.pane{display:none}
+.pane.show{display:block}
+
+/* Score bar */
+.score-bar{background:var(--navy-mid);border:1px solid rgba(201,168,76,.16);border-radius:11px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:16px}
+.score-ring-wrap{position:relative;width:64px;height:64px;flex-shrink:0}
+.sc-svg{width:64px;height:64px;transform:rotate(-90deg)}
+.sc-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:5}
+.sc-arc{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;stroke-dasharray:176;stroke-dashoffset:176;transition:stroke-dashoffset 1.2s ease}
+.sc-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold)}
+.sc-title{font-size:14px;font-weight:600;margin-bottom:3px}
+.sc-desc{font-size:12px;color:var(--gray);line-height:1.5;margin-bottom:7px}
+.kw-row{display:flex;flex-wrap:wrap;gap:5px}
+.kw{background:rgba(201,168,76,.09);border:1px solid rgba(201,168,76,.2);color:var(--gold-light);font-size:11px;padding:2px 8px;border-radius:50px;font-weight:500}
+
+/* CV document view */
+.cv-doc{background:var(--navy-mid);border:1px solid var(--border);border-radius:11px;padding:28px;font-size:13px;line-height:1.75;color:var(--cream)}
+.cv-doc .cv-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;text-align:center;margin-bottom:3px;color:var(--white)}
+.cv-doc .cv-contact{text-align:center;font-size:11px;color:var(--gray);margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.cv-doc .cv-sec{margin-top:16px}
+.cv-doc .cv-sec-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(201,168,76,.18)}
+.cv-doc .cv-job{margin-bottom:12px}
+.cv-doc .cv-job-title{font-size:13px;font-weight:600;color:var(--white)}
+.cv-doc .cv-job-meta{font-size:11px;color:var(--gray);margin-bottom:5px}
+.cv-doc ul{padding-left:14px;margin-top:3px}
+.cv-doc li{margin-bottom:2px;font-size:12px}
+.cv-doc p{font-size:12px;margin-bottom:4px}
+
+/* Cover letter view */
+.cl-doc{background:var(--navy-mid);border:1px solid var(--border);border-radius:11px;padding:28px;font-size:14px;line-height:1.85;color:var(--cream)}
+.cl-doc p{margin-bottom:14px}
+.cl-doc p:last-child{margin-bottom:0}
+
+@media(max-width:900px){
+  html,body{overflow:auto;height:auto}
+  .workspace{grid-template-columns:1fr;overflow:visible}
+  .lp{overflow:visible;height:auto}
+  .rp{min-height:600px}
+  .topnav .nav-mid{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <a href="/cvault-dashboard.html" class="logo">C<span>Vault</span></a>
+  <div class="nav-mid">
+    <div class="ns" id="ns1">1. Upload CV</div>
+    <span class="nav-arrow">›</span>
+    <div class="ns active" id="ns2">2. Job Description</div>
+    <span class="nav-arrow">›</span>
+    <div class="ns" id="ns3">3. Generate</div>
+  </div>
+  <div class="nav-right">
+    <a href="/cvault-payment.html" class="credits-chip" id="creditsChip">Loading…</a>
+    <a href="/cvault-dashboard.html" class="back-link">← Dashboard</a>
+  </div>
+</nav>
+
+<div class="workspace">
+
+  <!-- ═══════════ LEFT PANEL ═══════════ -->
+  <div class="lp">
+    <div class="lp-head">
+      <div class="lp-title">New Application</div>
+      <div class="lp-sub">Fill in all three steps then click Generate.</div>
+    </div>
+
+    <div class="lp-body">
+
+      <!-- STEP 1: CV -->
+      <div class="step-block">
+        <div class="step-lbl">
+          <div class="sn" id="sn1">1</div>
+          <span>Your CV</span>
+        </div>
+
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="cvFile" accept=".pdf,.doc,.docx,.txt" onchange="handleFile(this)" />
+          <div class="uz-icon">📄</div>
+          <div class="uz-text">Drop your CV here</div>
+          <div class="uz-sub">PDF, Word or TXT &nbsp;·&nbsp; or <span class="uz-link" onclick="showPaste(event)">paste as text</span></div>
+        </div>
+
+        <div class="file-pill" id="filePill">
+          <span>📎</span>
+          <span class="fp-name" id="fileName"></span>
+          <button class="fp-rm" onclick="removeFile()" type="button">×</button>
+        </div>
+
+        <div class="paste-toggle" id="pasteToggleRow">
+          <button onclick="showPaste(event)">✏️ Paste CV as text instead</button>
+        </div>
+
+        <div id="pasteBlock" style="display:none;margin-top:8px">
+          <textarea id="cvText" placeholder="Paste your full CV here — name, contact info, work experience, education and skills." rows="7" oninput="onCvPaste()"></textarea>
+          <div class="char-hint" id="cvChars">0 characters</div>
+          <div class="paste-toggle" style="margin-top:5px">
+            <button onclick="hidePaste()">📁 Upload a file instead</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- STEP 2: JOB DESCRIPTION -->
+      <div class="step-block">
+        <div class="step-lbl">
+          <div class="sn" id="sn2">2</div>
+          <span>Job Description</span>
+        </div>
+        <textarea id="jobDesc" placeholder="Paste the full job description here — job title, company, responsibilities and requirements." rows="7" oninput="onJobDesc()"></textarea>
+        <div class="char-hint" id="jobChars">0 characters</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- STEP 3: WHAT TO GENERATE -->
+      <div class="step-block">
+        <div class="step-lbl">
+          <div class="sn" id="sn3">3</div>
+          <span>What to Generate</span>
+        </div>
+        <div class="out-toggles">
+          <button class="ot active" id="otCV" onclick="toggleOut('cv')">
+            <span class="ot-icon">📄</span> Tailored CV
+          </button>
+          <button class="ot active" id="otCL" onclick="toggleOut('cl')">
+            <span class="ot-icon">✉️</span> Cover Letter
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="lp-foot">
+      <div class="no-cred-warn" id="noCredWarn">
+        You have no credits. <a href="/cvault-payment.html">Top up from KES 49 →</a>
+      </div>
+      <button class="btn-gen" id="genBtn" onclick="generate()" disabled>
+        <span>✨</span><span id="genBtnTxt">Tailor My CV</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ RIGHT PANEL ═══════════ -->
+  <div class="rp">
+    <div class="rp-head">
+      <div class="tab-row">
+        <button class="tab active" id="tabCV" onclick="switchTab('cv')">📄 Tailored CV</button>
+        <button class="tab" id="tabCL" onclick="switchTab('cl')">✉️ Cover Letter</button>
+      </div>
+      <div class="rp-actions">
+        <button class="act-btn" id="copyBtn" onclick="copyText()" disabled>📋 Copy</button>
+        <button class="act-btn primary" id="dlBtn" onclick="downloadDocx()" disabled>⬇ Download .docx</button>
+      </div>
+    </div>
+
+    <div class="rp-body">
+
+      <!-- EMPTY -->
+      <div class="state show" id="stateEmpty">
+        <div class="es-icon">✨</div>
+        <div class="es-title">Ready When You Are</div>
+        <p class="es-sub">Upload your CV, paste a job description, then click Generate. Your tailored documents will appear here.</p>
+      </div>
+
+      <!-- LOADING -->
+      <div class="state" id="stateLoading">
+        <div class="spin-ring"></div>
+        <div class="ld-title">Working on it…</div>
+        <div class="ld-msg" id="ldMsg">Analysing job requirements</div>
+        <div class="ld-steps" id="ldSteps"></div>
+      </div>
+
+      <!-- NO CREDITS GATE -->
+      <div class="state" id="stateGate">
+        <div class="gate">
+          <div class="gate-icon">💳</div>
+          <div class="gate-title">No Credits</div>
+          <p class="gate-sub">Top up to keep applying. Credits start at just KES 49 — one complete tailored CV and cover letter.</p>
+          <a href="/cvault-payment.html" class="btn-topup">Buy Credits →</a>
+        </div>
+      </div>
+
+      <!-- ERROR -->
+      <div class="state" id="stateError">
+        <div class="err-banner">
+          <strong>⚠️ Something went wrong</strong>
+          <span id="errMsg">Please try again.</span>
+          <br>
+          <button class="err-retry" onclick="retryGenerate()">Try Again</button>
+        </div>
+      </div>
+
+      <!-- CV PANE -->
+      <div class="pane" id="cvPane">
+        <div class="score-bar">
+          <div class="score-ring-wrap">
+            <svg class="sc-svg" viewBox="0 0 64 64" fill="none">
+              <circle class="sc-bg" cx="32" cy="32" r="28"/>
+              <circle class="sc-arc" id="scArc" cx="32" cy="32" r="28"/>
+            </svg>
+            <div class="sc-num" id="scNum">—</div>
+          </div>
+          <div>
+            <div class="sc-title">Job Match Score</div>
+            <div class="sc-desc" id="scDesc">—</div>
+            <div class="kw-row" id="kwRow"></div>
+          </div>
+        </div>
+        <div class="cv-doc" id="cvDoc"></div>
+      </div>
+
+      <!-- COVER LETTER PANE -->
+      <div class="pane" id="clPane">
+        <div class="cl-doc" id="clDoc"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = '';
+const token = localStorage.getItem('cvault_token');
+if (!token) { window.location.href = '/cvault-login.html'; }
+
+/* ── State ── */
+let hasCv = false, hasJob = false;
+let wantCV = true, wantCL = true;
+let activeTab = 'cv';
+let generating = false;
+let generatedCV = '', generatedCL = '';
+let parsedData = null;
+
+/* ── Credits — read from backend, display real values ── */
+let currentCredits = JSON.parse(localStorage.getItem('cvault_credits') || '{"single_credits":0,"triple_credits":0,"unlimited_until":null}');
+
+function isUnlimited() {
+  return currentCredits.unlimited_until && new Date(currentCredits.unlimited_until) > new Date();
+}
+function hasCredits() {
+  return isUnlimited() || currentCredits.single_credits > 0 || currentCredits.triple_credits > 0;
+}
+function creditLabel() {
+  if (isUnlimited()) {
+    const exp = new Date(currentCredits.unlimited_until);
+    return '∞ · expires ' + exp.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+  }
+  const t = currentCredits.single_credits + currentCredits.triple_credits * 3;
+  if (t === 0) return 'No credits · Top up';
+  return t + ' credit' + (t !== 1 ? 's' : '') + ' remaining';
+}
+
+function updateChip() {
+  const chip = document.getElementById('creditsChip');
+  chip.textContent = creditLabel();
+  chip.classList.toggle('warn', !hasCredits());
+}
+
+// Fetch fresh credits from backend on load
+async function loadCredits() {
+  try {
+    const res = await fetch(`${API}/api/payments/credits`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      credentials: 'include'
+    });
+    if (res.status === 401) { window.location.href = '/cvault-login.html'; return; }
+    if (res.ok) {
+      const c = await res.json();
+      currentCredits = c;
+      localStorage.setItem('cvault_credits', JSON.stringify(c));
+      updateChip();
+      checkReady();
+      if (!hasCredits()) {
+        document.getElementById('noCredWarn').style.display = 'block';
+        document.getElementById('genBtnTxt').textContent = 'No Credits — Top Up →';
+      }
+    }
+  } catch(e) {
+    // Use cached credits if network fails
+    updateChip();
+  }
+}
+
+updateChip();
+loadCredits();
+
+/* ── File handling ── */
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('filePill').classList.add('show');
+  document.getElementById('uploadZone').classList.add('has-file');
+  document.getElementById('pasteToggleRow').style.display = 'none';
+  hasCv = true;
+  markStep('sn1', 'ns1');
+  checkReady();
+}
+
+function removeFile() {
+  document.getElementById('cvFile').value = '';
+  document.getElementById('filePill').classList.remove('show');
+  document.getElementById('uploadZone').classList.remove('has-file');
+  document.getElementById('pasteToggleRow').style.display = 'block';
+  hasCv = false;
+  unmarkStep('sn1', 'ns1', '1');
+  checkReady();
+}
+
+function showPaste(e) {
+  e && e.preventDefault && e.preventDefault();
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('pasteBlock').style.display = 'block';
+  document.getElementById('pasteToggleRow').style.display = 'none';
+}
+
+function hidePaste() {
+  document.getElementById('uploadZone').style.display = '';
+  document.getElementById('pasteBlock').style.display = 'none';
+  document.getElementById('pasteToggleRow').style.display = 'block';
+  hasCv = false;
+  unmarkStep('sn1', 'ns1', '1');
+  checkReady();
+}
+
+function onCvPaste() {
+  const v = document.getElementById('cvText').value;
+  document.getElementById('cvChars').textContent = v.length + ' characters';
+  hasCv = v.trim().length > 60;
+  if (hasCv) markStep('sn1', 'ns1'); else unmarkStep('sn1', 'ns1', '1');
+  checkReady();
+}
+
+function onJobDesc() {
+  const v = document.getElementById('jobDesc').value;
+  document.getElementById('jobChars').textContent = v.length + ' characters';
+  hasJob = v.trim().length > 60;
+  if (hasJob) markStep('sn2', 'ns2'); else unmarkStep('sn2', 'ns2', '2');
+  checkReady();
+}
+
+function markStep(snId, nsId) {
+  const sn = document.getElementById(snId);
+  sn.classList.add('done'); sn.textContent = '✓';
+  document.getElementById(nsId).classList.add('done');
+  document.getElementById(nsId).classList.remove('active');
+}
+
+function unmarkStep(snId, nsId, num) {
+  const sn = document.getElementById(snId);
+  sn.classList.remove('done'); sn.textContent = num;
+  document.getElementById(nsId).classList.remove('done', 'active');
+}
+
+function toggleOut(type) {
+  if (type === 'cv') {
+    if (!wantCL && wantCV) return;
+    wantCV = !wantCV;
+    document.getElementById('otCV').classList.toggle('active', wantCV);
+  } else {
+    if (!wantCV && wantCL) return;
+    wantCL = !wantCL;
+    document.getElementById('otCL').classList.toggle('active', wantCL);
+  }
+  const sn3 = document.getElementById('sn3');
+  sn3.classList.add('done'); sn3.textContent = '✓';
+  document.getElementById('ns3').classList.add('done');
+}
+
+function checkReady() {
+  document.getElementById('noCredWarn').style.display = !hasCredits() ? 'block' : 'none';
+  const ready = hasCv && hasJob && hasCredits() && !generating;
+  document.getElementById('genBtn').disabled = !ready;
+  document.getElementById('genBtnTxt').textContent = !hasCredits() ? 'No Credits — Top Up →' : 'Tailor My CV →';
+}
+
+/* ── Tab switching ── */
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabCV').classList.toggle('active', tab === 'cv');
+  document.getElementById('tabCL').classList.toggle('active', tab === 'cl');
+  if (parsedData) showResultPane(tab);
+}
+
+/* ── State display ── */
+function showState(id) {
+  ['stateEmpty','stateLoading','stateGate','stateError'].forEach(s => {
+    document.getElementById(s).classList.remove('show');
+  });
+  document.getElementById('cvPane').classList.remove('show');
+  document.getElementById('clPane').classList.remove('show');
+  document.getElementById(id).classList.add('show');
+}
+
+function showResultPane(tab) {
+  ['stateEmpty','stateLoading','stateGate','stateError'].forEach(s => {
+    document.getElementById(s).classList.remove('show');
+  });
+  document.getElementById('cvPane').classList.toggle('show', tab === 'cv');
+  document.getElementById('clPane').classList.toggle('show', tab === 'cl');
+}
+
+/* ── GENERATE ── */
+async function generate() {
+  if (!hasCredits()) { window.location.href = '/cvault-payment.html'; return; }
+
+  generating = true;
+  checkReady();
+  document.getElementById('ns3').classList.add('active');
+
+  // Build form data — send file if uploaded, otherwise text
+  const formData = new FormData();
+  const fileInput = document.getElementById('cvFile');
+  if (fileInput.files[0]) {
+    formData.append('cvFile', fileInput.files[0]);
+  } else {
+    formData.append('cvText', document.getElementById('cvText').value.trim());
+  }
+  formData.append('jobDescription', document.getElementById('jobDesc').value.trim());
+
+  showState('stateLoading');
+  document.getElementById('copyBtn').disabled = true;
+  document.getElementById('dlBtn').disabled = true;
+  generatedCV = ''; generatedCL = ''; parsedData = null;
+
+  // Animated loading steps
+  const steps = [
+    { icon: '🔍', text: 'Analysing job requirements…' },
+    { icon: '🧠', text: 'Extracting key skills and keywords…' },
+    { icon: '✍️',  text: 'Rewriting your CV to match the role…' },
+    { icon: '✉️',  text: 'Crafting your cover letter…' },
+    { icon: '📄', text: 'Formatting your documents…' },
+  ];
+  const ldSteps = document.getElementById('ldSteps');
+  ldSteps.innerHTML = '';
+  let si = 0;
+  const stepTimer = setInterval(() => {
+    if (si < steps.length) {
+      document.getElementById('ldMsg').textContent = steps[si].text;
+      const el = document.createElement('div');
+      el.className = 'ld-step';
+      el.innerHTML = `<span>${steps[si].icon}</span><span>${steps[si].text}</span>`;
+      ldSteps.appendChild(el);
+      si++;
+    }
+  }, 1100);
+
+  try {
+    const res = await fetch(`${API}/api/generate`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      credentials: 'include',   // needed so Flask session cookie (paid flag) is sent
+      body: formData
+    });
+
+    clearInterval(stepTimer);
+
+    if (res.status === 401) { window.location.href = '/cvault-login.html'; return; }
+
+    if (res.status === 402) {
+      // Out of credits
+      currentCredits = { single_credits: 0, triple_credits: 0, unlimited_until: null };
+      localStorage.setItem('cvault_credits', JSON.stringify(currentCredits));
+      updateChip();
+      showState('stateGate');
+      generating = false;
+      checkReady();
+      return;
+    }
+
+    if (res.status === 403) {
+      // Payment not verified — redirect to payment page
+      window.location.href = '/cvault-payment.html';
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      document.getElementById('errMsg').textContent = data.error || 'An error occurred. Please try again.';
+      showState('stateError');
+      generating = false;
+      checkReady();
+      return;
+    }
+
+    parsedData = data;
+    generatedCV = buildCVText(data);
+    generatedCL = data.coverLetter || '';
+
+    // Refresh credits after consuming one
+    try {
+      const cr = await fetch(`${API}/api/payments/credits`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include'
+      });
+      if (cr.ok) {
+        const c = await cr.json();
+        currentCredits = c;
+        localStorage.setItem('cvault_credits', JSON.stringify(c));
+        updateChip();
+      }
+    } catch(e) {}
+
+    renderResults(data);
+
+  } catch(err) {
+    clearInterval(stepTimer);
+    document.getElementById('errMsg').textContent = 'Network error. Please check your connection and try again.';
+    showState('stateError');
+  }
+
+  generating = false;
+  checkReady();
+}
+
+function retryGenerate() {
+  showState('stateEmpty');
+  generate();
+}
+
+/* ── Render results ── */
+function renderResults(p) {
+  // Score ring
+  const score = Math.min(97, Math.max(40, p.matchScore || 75));
+  const circ = 2 * Math.PI * 28;
+  document.getElementById('scArc').style.strokeDashoffset = circ - (score / 100) * circ;
+  document.getElementById('scNum').textContent = score + '%';
+  document.getElementById('scDesc').textContent = p.scoreDescription || '';
+
+  // Keywords
+  const kwRow = document.getElementById('kwRow');
+  kwRow.innerHTML = '';
+  (p.matchedKeywords || []).slice(0, 7).forEach(k => {
+    const t = document.createElement('span');
+    t.className = 'kw'; t.textContent = k; kwRow.appendChild(t);
+  });
+
+  // Build CV HTML
+  const cv = p.tailoredCV || {};
+  let html = '';
+  if (p.candidateName) html += `<div class="cv-name">${esc(p.candidateName)}</div>`;
+  if (p.contactInfo)   html += `<div class="cv-contact">${esc(p.contactInfo)}</div>`;
+  if (cv.summary)      html += `<div class="cv-sec"><div class="cv-sec-title">Professional Summary</div><p>${esc(cv.summary)}</p></div>`;
+  if (cv.experience?.length) {
+    html += `<div class="cv-sec"><div class="cv-sec-title">Work Experience</div>`;
+    cv.experience.forEach(e => {
+      html += `<div class="cv-job">
+        <div class="cv-job-title">${esc(e.title||'')}</div>
+        <div class="cv-job-meta">${esc(e.company||'')}${e.period?' · '+esc(e.period):''}</div>
+        <ul>${(e.bullets||[]).map(b=>`<li>${esc(b)}</li>`).join('')}</ul>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  if (cv.education?.length) {
+    html += `<div class="cv-sec"><div class="cv-sec-title">Education</div>`;
+    cv.education.forEach(e => {
+      const line = [e.degree, e.institution].filter(Boolean).join(', ') + (e.year?` (${e.year})`:'');
+      html += `<p>${esc(line)}</p>`;
+    });
+    html += `</div>`;
+  }
+  if (cv.skills?.length) {
+    html += `<div class="cv-sec"><div class="cv-sec-title">Skills</div><p>${cv.skills.map(esc).join(' · ')}</p></div>`;
+  }
+  document.getElementById('cvDoc').innerHTML = html;
+
+  // Cover letter
+  const clParas = (p.coverLetter || '').split(/\n\n+/).filter(x => x.trim());
+  document.getElementById('clDoc').innerHTML = clParas.map(para => `<p>${esc(para.trim())}</p>`).join('');
+
+  // Enable actions + show output
+  document.getElementById('copyBtn').disabled = false;
+  document.getElementById('dlBtn').disabled = false;
+  showResultPane('cv');
+  activeTab = 'cv';
+  document.getElementById('tabCV').classList.add('active');
+  document.getElementById('tabCL').classList.remove('active');
+
+  document.getElementById('ns3').classList.remove('active');
+  document.getElementById('ns3').classList.add('done');
+  document.getElementById('sn3').classList.add('done');
+  document.getElementById('sn3').textContent = '✓';
+}
+
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildCVText(p) {
+  const cv = p.tailoredCV || {};
+  let out = '';
+  if (p.candidateName) out += p.candidateName + '\n';
+  if (p.contactInfo)   out += p.contactInfo + '\n';
+  out += '\n';
+  if (cv.summary) out += 'PROFESSIONAL SUMMARY\n' + cv.summary + '\n\n';
+  if (cv.experience?.length) {
+    out += 'WORK EXPERIENCE\n';
+    cv.experience.forEach(e => {
+      out += `${e.title||''} — ${e.company||''} (${e.period||''})\n`;
+      (e.bullets||[]).forEach(b => out += `• ${b}\n`);
+      out += '\n';
+    });
+  }
+  if (cv.education?.length) {
+    out += 'EDUCATION\n';
+    cv.education.forEach(e => {
+      let line = e.degree||'';
+      if (e.institution) line += ', ' + e.institution;
+      if (e.year) line += ` (${e.year})`;
+      out += line + '\n';
+    });
+    out += '\n';
+  }
+  if (cv.skills?.length) out += 'SKILLS\n' + cv.skills.join(' · ') + '\n';
+  return out;
+}
+
+/* ── Copy ── */
+function copyText() {
+  const text = activeTab === 'cv' ? generatedCV : generatedCL;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+  }).catch(() => alert('Copy failed — please select and copy manually.'));
+}
+
+/* ── Download .docx ── */
+async function downloadDocx() {
+  if (!parsedData) return;
+  const btn = document.getElementById('dlBtn');
+  btn.disabled = true; btn.textContent = '⏳ Building…';
+
+  try {
+    const { Document, Packer, Paragraph, TextRun, AlignmentType, LevelFormat, BorderStyle } = window.docx;
+
+    if (activeTab === 'cv') {
+      const cv = parsedData.tailoredCV || {};
+      const children = [];
+
+      if (parsedData.candidateName) {
+        children.push(new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 60 },
+          children: [new TextRun({ text: parsedData.candidateName, bold: true, size: 36, font: 'Calibri' })]
+        }));
+      }
+      if (parsedData.contactInfo) {
+        children.push(new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 240 },
+          children: [new TextRun({ text: parsedData.contactInfo, size: 18, color: '666666', font: 'Calibri' })]
+        }));
+      }
+
+      const secHd = (title) => new Paragraph({
+        spacing: { before: 240, after: 100 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'C9A84C', space: 3 } },
+        children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 20, color: '1A3258', font: 'Calibri' })]
+      });
+
+      if (cv.summary) {
+        children.push(secHd('Professional Summary'));
+        children.push(new Paragraph({ spacing: { after: 120 }, children: [new TextRun({ text: cv.summary, size: 20, font: 'Calibri' })] }));
+      }
+
+      if (cv.experience?.length) {
+        children.push(secHd('Work Experience'));
+        cv.experience.forEach(e => {
+          if (e.title) children.push(new Paragraph({ spacing: { before: 160, after: 40 }, children: [new TextRun({ text: e.title, bold: true, size: 22, font: 'Calibri' })] }));
+          const meta = [e.company, e.period].filter(Boolean).join(' · ');
+          if (meta) children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: meta, size: 18, color: '666666', font: 'Calibri', italics: true })] }));
+          (e.bullets || []).forEach(b => children.push(new Paragraph({
+            numbering: { reference: 'bullets', level: 0 },
+            spacing: { after: 40 },
+            children: [new TextRun({ text: b, size: 20, font: 'Calibri' })]
+          })));
+        });
+      }
+
+      if (cv.education?.length) {
+        children.push(secHd('Education'));
+        cv.education.forEach(e => {
+          const line = [e.degree, e.institution].filter(Boolean).join(', ') + (e.year ? ` (${e.year})` : '');
+          children.push(new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: line, size: 20, font: 'Calibri' })] }));
+        });
+      }
+
+      if (cv.skills?.length) {
+        children.push(secHd('Skills'));
+        children.push(new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: cv.skills.join(' · '), size: 20, font: 'Calibri' })] }));
+      }
+
+      const doc = new Document({
+        numbering: { config: [{ reference: 'bullets', levels: [{ level: 0, format: LevelFormat.BULLET, text: '•', alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 720, hanging: 360 } } } }] }] },
+        sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children }]
+      });
+
+      const blob = await Packer.toBlob(doc);
+      const name = (parsedData.candidateName || 'CV').replace(/\s+/g, '-');
+      triggerDownload(blob, `CVault-Tailored-CV-${name}.docx`);
+
+    } else {
+      // Cover letter
+      const clParas = (parsedData.coverLetter || '').split(/\n\n+/).filter(x => x.trim());
+      const children = [];
+      children.push(new Paragraph({
+        spacing: { after: 360 },
+        children: [new TextRun({ text: new Date().toLocaleDateString('en-KE', { day: 'numeric', month: 'long', year: 'numeric' }), size: 20, font: 'Calibri', color: '666666' })]
+      }));
+      clParas.forEach((para, i) => {
+        children.push(new Paragraph({ spacing: { after: i < clParas.length - 1 ? 240 : 0 }, children: [new TextRun({ text: para.trim(), size: 22, font: 'Calibri' })] }));
+      });
+
+      const doc = new Document({
+        sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children }]
+      });
+
+      const blob = await Packer.toBlob(doc);
+      const name = (parsedData.candidateName || 'CoverLetter').replace(/\s+/g, '-');
+      triggerDownload(blob, `CVault-Cover-Letter-${name}.docx`);
+    }
+
+  } catch(err) {
+    console.error(err);
+    alert('Could not build the Word document: ' + err.message + '\n\nUse the Copy button instead.');
+  }
+
+  btn.disabled = false; btn.textContent = '⬇ Download .docx';
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
+
+/* ── Drag & drop ── */
+const uz = document.getElementById('uploadZone');
+uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('over'); });
+uz.addEventListener('dragleave', () => uz.classList.remove('over'));
+uz.addEventListener('drop', e => {
+  e.preventDefault(); uz.classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const dt = new DataTransfer(); dt.items.add(file);
+  document.getElementById('cvFile').files = dt.files;
+  handleFile(document.getElementById('cvFile'));
+});
+</script>
+</body>
+</html>

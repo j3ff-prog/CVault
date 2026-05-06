@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVault — Log In</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1628;--navy-mid:#112240;--gold:#C9A84C;--gold-light:#E8C97A;--cream:#F5F0E8;--white:#FFFFFF;--gray:#8A9AB5;--red:#E55C5C}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;display:flex}
+.left{width:44%;background:var(--navy-mid);border-right:1px solid rgba(201,168,76,.15);display:flex;flex-direction:column;justify-content:space-between;padding:52px;position:relative;overflow:hidden;flex-shrink:0}
+.left::before{content:'';position:absolute;top:-180px;right:-180px;width:420px;height:420px;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--gold);text-decoration:none;letter-spacing:1px;display:inline-block;position:relative;z-index:2}
+.logo span{color:var(--white)}
+.panel-mid{position:relative;z-index:2}
+.panel-mid h2{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;line-height:1.1;margin-bottom:14px}
+.panel-mid h2 em{color:var(--gold);font-style:italic;display:block}
+.panel-mid p{color:var(--gray);font-size:14px;line-height:1.7;font-weight:300;max-width:290px}
+.feat-list{list-style:none;position:relative;z-index:2}
+.feat-list li{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px;color:var(--cream)}
+.feat-list li:last-child{border-bottom:none}
+.fi{width:36px;height:36px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.right{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 52px}
+.form-box{width:100%;max-width:380px;animation:fadeUp .4s ease both}
+.form-top{margin-bottom:28px}
+.form-top h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:6px}
+.form-top p{color:var(--gray);font-size:14px}
+.form-top a{color:var(--gold);text-decoration:none;font-weight:500}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--cream);margin-bottom:6px}
+.fg input{width:100%;padding:12px 15px;background:rgba(17,34,64,.9);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.fg input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.fg input::placeholder{color:var(--gray)}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px}
+.pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gray);cursor:pointer;font-size:15px;padding:4px;line-height:1}
+.pw-eye:hover{color:var(--gold)}
+.forgot-row{text-align:right;margin-top:-8px;margin-bottom:20px}
+.forgot-row a{font-size:13px;color:var(--gold);text-decoration:none}
+.forgot-row a:hover{text-decoration:underline}
+.err-msg{background:rgba(229,92,92,.1);border:1px solid rgba(229,92,92,.3);color:var(--red);padding:10px 13px;border-radius:7px;font-size:13px;margin-bottom:16px;display:none}
+.btn-main{width:100%;padding:14px;background:var(--gold);color:var(--navy);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-main:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.26)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.left{display:none}.right{padding:32px 20px}}
+</style>
+</head>
+<body>
+<div class="left">
+  <a href="/" class="logo">C<span>Vault</span></a>
+  <div class="panel-mid">
+    <h2>Welcome<em>Back.</em></h2>
+    <p>Log in and continue landing interviews with CVs tailored to every job you apply for.</p>
+  </div>
+  <ul class="feat-list">
+    <li><div class="fi">📄</div> CV tailored to the exact job description</li>
+    <li><div class="fi">✉️</div> Cover letter that sounds like you wrote it</li>
+    <li><div class="fi">⬇️</div> Download as Word document — ready to send</li>
+    <li><div class="fi">💳</div> Pay as you go — from just KES 49</li>
+  </ul>
+</div>
+<div class="right">
+  <div class="form-box">
+    <div class="form-top">
+      <h2>Log In</h2>
+      <p>Don't have an account? <a href="/cvault-signup.html">Sign up free →</a></p>
+    </div>
+    <div class="err-msg" id="err"></div>
+    <div class="fg"><label>Email Address</label><input type="email" id="em" placeholder="you@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')login()" /></div>
+    <div class="fg">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="pw" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()" />
+        <button class="pw-eye" type="button" onclick="togglePw()">👁</button>
+      </div>
+    </div>
+    <div class="forgot-row"><a href="/cvault-forgot-password.html">Forgot your password?</a></div>
+    <button class="btn-main" id="submitBtn" onclick="login()">Log In →</button>
+  </div>
+</div>
+<script>
+const API = '';
+
+function togglePw(){const el=document.getElementById('pw'),btn=document.querySelector('.pw-eye');el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🙈'}
+function showErr(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block'}
+
+async function login(){
+  document.getElementById('err').style.display='none';
+  const em=document.getElementById('em').value.trim();
+  const pw=document.getElementById('pw').value;
+  if(!em||!em.includes('@'))return showErr('Please enter a valid email address.');
+  if(!pw)return showErr('Please enter your password.');
+
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.textContent='Logging in…';
+
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email:em, password:pw})
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showErr(data.error || 'Login failed. Please try again.');
+      btn.disabled=false; btn.textContent='Log In →';
+      return;
+    }
+    localStorage.setItem('cvault_token', data.token);
+    localStorage.setItem('cvault_user', JSON.stringify(data.user));
+    localStorage.setItem('cvault_credits', JSON.stringify(data.credits));
+    window.location.href = '/cvault-dashboard.html';
+  } catch(e) {
+    showErr('Network error. Please check your connection and try again.');
+    btn.disabled=false; btn.textContent='Log In →';
+  }
+}
+</script>
+</body>
+</html>

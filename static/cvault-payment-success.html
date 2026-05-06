@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVault — Verifying Payment…</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1628;--navy-mid:#112240;--gold:#C9A84C;--gold-light:#E8C97A;
+  --cream:#F5F0E8;--white:#FFFFFF;--gray:#8A9AB5;
+  --success:#2ECC71;--success-dim:rgba(46,204,113,0.1);
+  --red:#E55C5C;--red-dim:rgba(229,92,92,0.1);
+  --border-gold:rgba(201,168,76,0.22)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:40px 24px}
+
+.logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;
+  color:var(--gold);text-decoration:none;margin-bottom:44px;letter-spacing:1px}
+.logo span{color:var(--white)}
+
+/* ── VERIFYING STATE ── */
+.verifying-card{background:var(--navy-mid);border:1px solid var(--border-gold);
+  border-radius:24px;padding:52px 44px;text-align:center;max-width:440px;width:100%;
+  animation:fadeUp .4s ease both}
+.spin{width:56px;height:56px;border-radius:50%;border:3px solid rgba(201,168,76,.15);
+  border-top-color:var(--gold);animation:spin 1s linear infinite;margin:0 auto 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.verifying-title{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:10px}
+.verifying-sub{font-size:14px;color:var(--gray);line-height:1.7}
+
+/* ── SUCCESS STATE ── */
+.success-card{background:var(--navy-mid);border:1px solid var(--border-gold);
+  border-radius:24px;padding:52px 44px;text-align:center;
+  max-width:460px;width:100%;position:relative;overflow:hidden;
+  display:none;animation:popIn .5s cubic-bezier(0.175,0.885,0.32,1.275) both}
+.success-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--success),transparent)}
+@keyframes popIn{from{opacity:0;transform:scale(0.88)}to{opacity:1;transform:scale(1)}}
+
+.check-wrap{width:84px;height:84px;margin:0 auto 28px;position:relative}
+.check-circle{width:84px;height:84px;border-radius:50%;
+  background:var(--success-dim);border:2px solid var(--success);
+  display:flex;align-items:center;justify-content:center;
+  animation:scaleIn .4s .2s cubic-bezier(0.175,0.885,0.32,1.275) both}
+@keyframes scaleIn{from{transform:scale(0)}to{transform:scale(1)}}
+.check-icon{font-size:36px}
+.ring{position:absolute;border-radius:50%;border:1px solid rgba(46,204,113,.15);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:ringExpand 2.5s ease-out infinite}
+.ring:nth-child(2){animation-delay:.6s}
+.ring:nth-child(3){animation-delay:1.2s}
+@keyframes ringExpand{0%{width:84px;height:84px;opacity:.6}100%{width:200px;height:200px;opacity:0}}
+
+.success-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;margin-bottom:10px}
+.success-sub{font-size:15px;color:var(--gray);line-height:1.7;margin-bottom:32px;font-weight:300}
+
+.plan-summary{background:rgba(201,168,76,.08);border:1px solid var(--border-gold);
+  border-radius:12px;padding:18px 22px;margin-bottom:28px;text-align:left}
+.summary-row{display:flex;justify-content:space-between;align-items:center;
+  font-size:14px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.summary-row:last-child{border-bottom:none;padding-bottom:0}
+.summary-row:first-child{padding-top:0}
+.sk{color:var(--gray)}
+.sv{color:var(--white);font-weight:600}
+.sv.gold{color:var(--gold)}
+.sv.green{color:var(--success)}
+.sv.mono{font-family:monospace;font-size:12px;color:var(--gray)}
+
+.btn-start{display:block;width:100%;padding:16px;background:var(--gold);
+  color:var(--navy);border:none;border-radius:10px;font-size:16px;font-weight:700;
+  cursor:pointer;transition:all .3s;font-family:'DM Sans',sans-serif;
+  text-decoration:none;text-align:center}
+.btn-start:hover{background:var(--gold-light);box-shadow:0 8px 30px rgba(201,168,76,.3);transform:translateY(-1px)}
+
+/* ── FAILED STATE ── */
+.failed-card{background:var(--navy-mid);border:1px solid rgba(229,92,92,.25);
+  border-radius:24px;padding:52px 44px;text-align:center;
+  max-width:440px;width:100%;display:none;animation:fadeUp .4s ease both}
+.fail-icon{font-size:52px;margin-bottom:20px}
+.failed-title{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:10px}
+.failed-sub{font-size:14px;color:var(--gray);line-height:1.7;margin-bottom:28px}
+.failed-detail{background:var(--red-dim);border:1px solid rgba(229,92,92,.2);
+  border-radius:8px;padding:12px 16px;font-size:13px;color:#F08080;
+  margin-bottom:24px;text-align:left;line-height:1.6}
+.btn-retry{display:inline-block;padding:13px 32px;background:var(--gold);
+  color:var(--navy);border-radius:8px;font-weight:700;font-size:14px;
+  text-decoration:none;transition:all .3s;margin-right:10px}
+.btn-retry:hover{background:var(--gold-light)}
+.btn-dash{display:inline-block;padding:12px 24px;border:1.5px solid rgba(255,255,255,.15);
+  color:var(--gray);border-radius:8px;font-size:14px;text-decoration:none;transition:all .3s}
+.btn-dash:hover{border-color:var(--gold);color:var(--gold)}
+
+/* confetti */
+.confetti-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:-1}
+.dot{position:absolute;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(540deg);opacity:0}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="confetti-wrap" id="confetti"></div>
+
+<a href="/" class="logo">C<span>Vault</span></a>
+
+<!-- VERIFYING (shown while API call is in progress) -->
+<div class="verifying-card" id="verifyingCard">
+  <div class="spin"></div>
+  <div class="verifying-title">Verifying Payment…</div>
+  <p class="verifying-sub">Please wait while we confirm your payment with Paystack. This takes a few seconds.</p>
+</div>
+
+<!-- SUCCESS (shown after real Paystack confirmation) -->
+<div class="success-card" id="successCard">
+  <div class="check-wrap">
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+    <div class="check-circle"><div class="check-icon">✓</div></div>
+  </div>
+  <h1 class="success-title">Payment Confirmed!</h1>
+  <p class="success-sub">Your credits are now active. Start tailoring your CV and applying to jobs right away.</p>
+  <div class="plan-summary">
+    <div class="summary-row"><span class="sk">Plan</span><span class="sv gold" id="planName">—</span></div>
+    <div class="summary-row"><span class="sk">Amount Paid</span><span class="sv gold" id="amountPaid">—</span></div>
+    <div class="summary-row"><span class="sk">Credits Added</span><span class="sv" id="creditsAdded">—</span></div>
+    <div class="summary-row"><span class="sk">Transaction Ref</span><span class="sv mono" id="txnRef">—</span></div>
+    <div class="summary-row"><span class="sk">Status</span><span class="sv green">✓ Verified by Paystack</span></div>
+  </div>
+  <a href="/cvault-analysis.html" class="btn-start">Start Using CVault →</a>
+</div>
+
+<!-- FAILED (shown if Paystack says payment not successful) -->
+<div class="failed-card" id="failedCard">
+  <div class="fail-icon">⚠️</div>
+  <h2 class="failed-title">Payment Not Confirmed</h2>
+  <p class="failed-sub">We could not verify this payment with Paystack. No credits have been added to your account.</p>
+  <div class="failed-detail" id="failedDetail">The transaction could not be confirmed. If money was deducted from your account, please contact support with your reference number.</div>
+  <div>
+    <a href="/cvault-payment.html" class="btn-retry">Try Again →</a>
+    <a href="/cvault-dashboard.html" class="btn-dash">Dashboard</a>
+  </div>
+</div>
+
+<script>
+const API = '';
+
+// ── Read Paystack callback params from URL ──────────────────────────────
+// Paystack appends ?reference=XXX&trxref=XXX to your callback URL
+const params    = new URLSearchParams(window.location.search);
+const reference = params.get('reference') || params.get('trxref') || '';
+const token     = localStorage.getItem('cvault_token');
+
+// Not logged in → send to login
+if (!token) {
+  window.location.href = '/cvault-login.html';
+}
+
+// No reference in URL → Paystack didn't redirect properly
+if (!reference) {
+  showFailed('No payment reference found in the URL. Please try your payment again.');
+}
+
+const planLabels = {
+  single:    { name: 'Single Use (1 Application)', amount: 'KES 49',  credits: '1 application credit' },
+  triple:    { name: 'Triple Pack (3 Applications)', amount: 'KES 99', credits: '3 application credits' },
+  unlimited: { name: 'Day Pass (Unlimited 24h)',    amount: 'KES 199', credits: 'Unlimited — 24 hours' }
+};
+
+// ── Call backend to verify with Paystack ───────────────────────────────
+async function verifyPayment() {
+  try {
+    const res = await fetch(`${API}/api/payments/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      // credentials: 'include' is required so Flask session cookie is saved
+      credentials: 'include',
+      body: JSON.stringify({ reference })
+    });
+
+    if (res.status === 401) {
+      window.location.href = '/cvault-login.html';
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!res.ok || data.status === 'failed') {
+      showFailed(data.error || 'Payment could not be verified. Please contact support.');
+      return;
+    }
+
+    // ── Payment confirmed ────────────────────────────────────────────
+    const plan = data.plan || localStorage.getItem('cvault_pending_purchase') || 'single';
+    const info = planLabels[plan] || { name: plan, amount: '—', credits: '—' };
+
+    // Update localStorage credits with fresh data from backend
+    if (data.credits) {
+      localStorage.setItem('cvault_credits', JSON.stringify(data.credits));
+    }
+    localStorage.removeItem('cvault_pending_purchase');
+
+    // Populate receipt
+    document.getElementById('planName').textContent    = info.name;
+    document.getElementById('amountPaid').textContent  = info.amount;
+    document.getElementById('creditsAdded').textContent = info.credits;
+    document.getElementById('txnRef').textContent      = reference;
+
+    showSuccess();
+    spawnConfetti();
+
+  } catch(e) {
+    showFailed('Network error while verifying payment. Please check your connection and try again.');
+  }
+}
+
+function showSuccess() {
+  document.getElementById('verifyingCard').style.display = 'none';
+  document.getElementById('successCard').style.display   = 'block';
+  document.getElementById('failedCard').style.display    = 'none';
+}
+
+function showFailed(msg) {
+  document.getElementById('verifyingCard').style.display  = 'none';
+  document.getElementById('successCard').style.display    = 'none';
+  document.getElementById('failedCard').style.display     = 'block';
+  if (msg) document.getElementById('failedDetail').textContent = msg;
+}
+
+function spawnConfetti() {
+  const colors = ['#C9A84C','#E8C97A','#2ECC71','#ffffff','#90caf9'];
+  const wrap   = document.getElementById('confetti');
+  for (let i = 0; i < 60; i++) {
+    const d  = document.createElement('div');
+    d.className = 'dot';
+    const sz = Math.random() * 8 + 4;
+    d.style.cssText = `left:${Math.random()*100}vw;width:${sz}px;height:${sz}px;`
+      + `background:${colors[Math.floor(Math.random()*colors.length)]};`
+      + `animation-duration:${Math.random()*2+2}s;animation-delay:${Math.random()*1.5}s;`
+      + `border-radius:${Math.random()>.5?'50%':'2px'}`;
+    wrap.appendChild(d);
+  }
+}
+
+// Start verification immediately on page load
+if (reference) verifyPayment();
+</script>
+</body>
+</html>
