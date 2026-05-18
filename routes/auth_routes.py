@@ -8,6 +8,7 @@ Authentication endpoints:
   GET  /api/auth/me
 """
 import os
+import threading
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
@@ -67,11 +68,14 @@ def signup():
     if email == OWNER_EMAIL:
         _ensure_owner_unlimited(user_id)
 
-    # Send welcome email
-    try:
-        send_welcome(email, first_name)
-    except Exception as e:
-        print(f"[AUTH] Welcome email failed: {e}")
+   # Send welcome email in background — never block or crash signup
+    import threading
+    def _send_welcome_bg():
+        try:
+             send_welcome(email, first_name)
+        except Exception as e:
+            print(f"[AUTH] Welcome email failed: {e}")
+    threading.Thread(target=_send_welcome_bg, daemon=True).start()
 
     token = create_access_token(identity=str(user_id))
     credits = get_credits(user_id)
@@ -194,11 +198,13 @@ def forgot_password():
 
     token = generate_reset_token(user["id"])
 
-    try:
-        send_password_reset(email, user["first_name"], token)
-    except Exception as e:
+    import threading
+    def _send_reset_bg():
+      try:
+         send_password_reset(email, user["first_name"], token)
+      except Exception as e:
         print(f"[AUTH] Reset email failed: {e}")
-        return jsonify({"error": "Failed to send reset email. Please try again later."}), 500
+    threading.Thread(target=_send_reset_bg, daemon=True).start()
 
     return jsonify({"message": "Password reset link sent to your email."}), 200
 

@@ -25,7 +25,7 @@ def _send(to_email: str, subject: str, html_body: str) -> bool:
     msg["To"] = to_email
     msg.attach(MIMEText(html_body, "html"))
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
             server.sendmail(GMAIL_USER, to_email, msg.as_string())
         print(f"[EMAIL] Sent '{subject}' to {to_email}")
