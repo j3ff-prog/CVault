@@ -777,129 +777,281 @@ function copyText() {
 }
 
 /* ── Download .docx ── */
+/* ═══════════════════════════════════════════════════════════════════
+   REPLACE the entire downloadDocx() function in cvault-analysis.html
+   with this one. Everything else in the file stays the same.
+═══════════════════════════════════════════════════════════════════ */
+
 async function downloadDocx() {
   if (!parsedData) return;
   const btn = document.getElementById('dlBtn');
   btn.disabled = true; btn.textContent = '⏳ Building…';
 
   try {
-    const { Document, Packer, Paragraph, TextRun, AlignmentType, LevelFormat, BorderStyle } = window.docx;
+    const {
+      Document, Packer, Paragraph, TextRun, AlignmentType,
+      LevelFormat, BorderStyle, TabStopPosition, TabStopType,
+      UnderlineType, HeightRule, convertInchesToTwip
+    } = docx;
 
+    // ── Shared style helpers ──────────────────────────────────────────
+    const FONT = 'Times New Roman';
+    const COLOR_BLACK = '000000';
+    const COLOR_GRAY  = '444444';
+
+    // Full-width horizontal rule (simulated with bottom border paragraph)
+    const hrParagraph = () => new Paragraph({
+      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: COLOR_BLACK, space: 0 } },
+      spacing: { before: 0, after: 0 }
+    });
+
+    // Section heading — e.g. WORK EXPERIENCE
+    const sectionHeader = (text) => new Paragraph({
+      spacing: { before: 200, after: 60 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: COLOR_BLACK, space: 4 } },
+      children: [
+        new TextRun({
+          text: text.toUpperCase(),
+          font: FONT,
+          size: 22,         // 11pt
+          bold: true,
+          color: COLOR_BLACK,
+          allCaps: true,
+        })
+      ]
+    });
+
+    // ── BUILD CV DOCUMENT ─────────────────────────────────────────────
     if (activeTab === 'cv') {
       const cv = parsedData.tailoredCV || {};
       const children = [];
 
+      // ── NAME ──
       if (parsedData.candidateName) {
         children.push(new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing: { after: 60 },
-          children: [new TextRun({ text: parsedData.candidateName, bold: true, size: 36, font: 'Calibri' })]
+          spacing: { before: 0, after: 60 },
+          children: [new TextRun({
+            text: parsedData.candidateName.toUpperCase(),
+            font: FONT,
+            size: 32,      // 16pt
+            bold: true,
+            color: COLOR_BLACK,
+          })]
         }));
       }
+
+      // ── CONTACT LINE ──
       if (parsedData.contactInfo) {
         children.push(new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing: { after: 240 },
-          children: [new TextRun({ text: parsedData.contactInfo, size: 18, color: '666666', font: 'Calibri' })]
+          spacing: { before: 0, after: 160 },
+          children: [new TextRun({
+            text: parsedData.contactInfo,
+            font: FONT,
+            size: 20,      // 10pt
+            color: COLOR_GRAY,
+          })]
         }));
       }
 
-      const secHd = (title) => new Paragraph({
-        spacing: { before: 240, after: 100 },
-        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'C9A84C', space: 3 } },
-        children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 20, color: '1A3258', font: 'Calibri' })]
-      });
-
+      // ── PROFESSIONAL SUMMARY ──
       if (cv.summary) {
-        children.push(secHd('Professional Summary'));
-        children.push(new Paragraph({ spacing: { after: 120 }, children: [new TextRun({ text: cv.summary, size: 20, font: 'Calibri' })] }));
+        children.push(sectionHeader('Professional Summary'));
+        children.push(new Paragraph({
+          spacing: { before: 60, after: 160 },
+          children: [new TextRun({
+            text: cv.summary,
+            font: FONT,
+            size: 22,      // 11pt
+            color: COLOR_BLACK,
+          })]
+        }));
       }
 
+      // ── WORK EXPERIENCE ──
       if (cv.experience?.length) {
-        children.push(secHd('Work Experience'));
-        cv.experience.forEach(e => {
-          if (e.title) children.push(new Paragraph({ spacing: { before: 160, after: 40 }, children: [new TextRun({ text: e.title, bold: true, size: 22, font: 'Calibri' })] }));
-          const meta = [e.company, e.period].filter(Boolean).join(' · ');
-          if (meta) children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: meta, size: 18, color: '666666', font: 'Calibri', italics: true })] }));
-          (e.bullets || []).forEach(b => children.push(new Paragraph({
-            numbering: { reference: 'bullets', level: 0 },
-            spacing: { after: 40 },
-            children: [new TextRun({ text: b, size: 20, font: 'Calibri' })]
-          })));
+        children.push(sectionHeader('Work Experience'));
+
+        cv.experience.forEach((e, idx) => {
+          // Job title
+          if (e.title) {
+            children.push(new Paragraph({
+              spacing: { before: idx === 0 ? 80 : 160, after: 40 },
+              children: [new TextRun({
+                text: e.title,
+                font: FONT,
+                size: 22,
+                bold: true,
+                color: COLOR_BLACK,
+              })]
+            }));
+          }
+
+          // Company · Period on same line
+          const companyPeriod = [e.company, e.period].filter(Boolean).join('  ·  ');
+          if (companyPeriod) {
+            children.push(new Paragraph({
+              spacing: { before: 0, after: 60 },
+              children: [new TextRun({
+                text: companyPeriod,
+                font: FONT,
+                size: 20,    // 10pt
+                italics: true,
+                color: COLOR_GRAY,
+              })]
+            }));
+          }
+
+          // Bullet points
+          (e.bullets || []).forEach(b => {
+            children.push(new Paragraph({
+              spacing: { before: 40, after: 40 },
+              indent: { left: convertInchesToTwip(0.25), hanging: convertInchesToTwip(0.2) },
+              children: [
+                new TextRun({ text: '•  ', font: FONT, size: 22, color: COLOR_BLACK }),
+                new TextRun({ text: b, font: FONT, size: 22, color: COLOR_BLACK }),
+              ]
+            }));
+          });
         });
       }
 
+      // ── EDUCATION ──
       if (cv.education?.length) {
-        children.push(secHd('Education'));
-        cv.education.forEach(e => {
-          const line = [e.degree, e.institution].filter(Boolean).join(', ') + (e.year ? ` (${e.year})` : '');
-          children.push(new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: line, size: 20, font: 'Calibri' })] }));
+        children.push(sectionHeader('Education'));
+        cv.education.forEach((e, idx) => {
+          // Degree — bold
+          children.push(new Paragraph({
+            spacing: { before: idx === 0 ? 80 : 120, after: 30 },
+            children: [new TextRun({
+              text: e.degree || '',
+              font: FONT,
+              size: 22,
+              bold: true,
+              color: COLOR_BLACK,
+            })]
+          }));
+          // Institution + year — italic gray
+          const instLine = [e.institution, e.year].filter(Boolean).join('  ·  ');
+          if (instLine) {
+            children.push(new Paragraph({
+              spacing: { before: 0, after: 60 },
+              children: [new TextRun({
+                text: instLine,
+                font: FONT,
+                size: 20,
+                italics: true,
+                color: COLOR_GRAY,
+              })]
+            }));
+          }
         });
       }
 
+      // ── SKILLS ──
       if (cv.skills?.length) {
-        children.push(secHd('Skills'));
-        children.push(new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: cv.skills.join(' · '), size: 20, font: 'Calibri' })] }));
+        children.push(sectionHeader('Skills'));
+        // Group skills into rows of 3 for readability
+        const skillRows = [];
+        for (let i = 0; i < cv.skills.length; i += 3) {
+          skillRows.push(cv.skills.slice(i, i + 3).join('   ·   '));
+        }
+        skillRows.forEach((row, idx) => {
+          children.push(new Paragraph({
+            spacing: { before: idx === 0 ? 80 : 40, after: 40 },
+            children: [new TextRun({
+              text: row,
+              font: FONT,
+              size: 22,
+              color: COLOR_BLACK,
+            })]
+          }));
+        });
       }
 
-      const doc = new Document({
-        numbering: { config: [{ reference: 'bullets', levels: [{ level: 0, format: LevelFormat.BULLET, text: '•', alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 720, hanging: 360 } } } }] }] },
-        sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } }, children }]
+      const cvDoc = new Document({
+        sections: [{
+          properties: {
+            page: {
+              size: { width: 12240, height: 15840 },       // Letter size
+              margin: {
+                top:    convertInchesToTwip(1.0),
+                bottom: convertInchesToTwip(1.0),
+                left:   convertInchesToTwip(1.1),
+                right:  convertInchesToTwip(1.1),
+              }
+            }
+          },
+          children
+        }]
       });
 
-      const blob = await Packer.toBlob(doc);
+      const blob = await Packer.toBlob(cvDoc);
       const name = (parsedData.candidateName || 'CV').replace(/\s+/g, '-');
-      triggerDownload(blob, `CVault-Tailored-CV-${name}.docx`);
+      triggerDownload(blob, `${name}-Tailored-CV.docx`);
 
     } else {
-      // Cover letter
-      const clParas = (parsedData.coverLetter || '').split(/\n\n+/).filter(x => x.trim());
+      // ── BUILD COVER LETTER DOCUMENT ───────────────────────────────
+      const clText = parsedData.coverLetter || '';
+      const paragraphs = clText.split(/\n\n+/).filter(p => p.trim());
       const children = [];
-      children.push(new Paragraph({
-        spacing: { after: 360 },
-        children: [new TextRun({ text: new Date().toLocaleDateString('en-KE', { day: 'numeric', month: 'long', year: 'numeric' }), size: 20, font: 'Calibri', color: '666666' })]
-      }));
-      clParas.forEach((para, i) => {
-        children.push(new Paragraph({ spacing: { after: i < clParas.length - 1 ? 240 : 0 }, children: [new TextRun({ text: para.trim(), size: 22, font: 'Calibri' })] }));
+
+      paragraphs.forEach((para, idx) => {
+        const text = para.trim();
+
+        // Detect the sign-off block (contains "sincerely" or candidate name at end)
+        const isSignoff = idx >= paragraphs.length - 2;
+        const isDate = idx === 0 && /^\d{1,2}\s+\w+\s+\d{4}/.test(text);
+        const isSalutation = text.toLowerCase().startsWith('dear');
+
+        children.push(new Paragraph({
+          spacing: {
+            before: idx === 0 ? 0 : (isSalutation ? 320 : 240),
+            after: isDate ? 200 : 0,
+            line: 276,         // 1.15 line spacing
+            lineRule: HeightRule.AUTO,
+          },
+          children: [new TextRun({
+            text,
+            font: FONT,
+            size: 24,          // 12pt — standard letter size
+            color: COLOR_BLACK,
+            bold: false,
+          })]
+        }));
       });
 
-      const doc = new Document({
-        sections: [{ properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children }]
+      const clDoc = new Document({
+        sections: [{
+          properties: {
+            page: {
+              size: { width: 12240, height: 15840 },
+              margin: {
+                top:    convertInchesToTwip(1.2),
+                bottom: convertInchesToTwip(1.2),
+                left:   convertInchesToTwip(1.25),
+                right:  convertInchesToTwip(1.25),
+              }
+            }
+          },
+          children
+        }]
       });
 
-      const blob = await Packer.toBlob(doc);
+      const blob = await Packer.toBlob(clDoc);
       const name = (parsedData.candidateName || 'CoverLetter').replace(/\s+/g, '-');
-      triggerDownload(blob, `CVault-Cover-Letter-${name}.docx`);
+      triggerDownload(blob, `${name}-Cover-Letter.docx`);
     }
 
   } catch(err) {
-    console.error(err);
+    console.error('DOCX error:', err);
     alert('Could not build the Word document: ' + err.message + '\n\nUse the Copy button instead.');
   }
 
-  btn.disabled = false; btn.textContent = '⬇ Download .docx';
+  btn.disabled = false;
+  btn.textContent = '⬇ Download .docx';
 }
-
-function triggerDownload(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
-}
-
-/* ── Drag & drop ── */
-const uz = document.getElementById('uploadZone');
-uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('over'); });
-uz.addEventListener('dragleave', () => uz.classList.remove('over'));
-uz.addEventListener('drop', e => {
-  e.preventDefault(); uz.classList.remove('over');
-  const file = e.dataTransfer.files[0];
-  if (!file) return;
-  const dt = new DataTransfer(); dt.items.add(file);
-  document.getElementById('cvFile').files = dt.files;
-  handleFile(document.getElementById('cvFile'));
-});
 </script>
 </body>
 </html>
