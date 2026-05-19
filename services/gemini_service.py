@@ -17,7 +17,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY", ""))
+_api_key = os.getenv("GEMINI_API_KEY", "")
+if not _api_key:
+    raise EnvironmentError(
+        "GEMINI_API_KEY is not set. Add it to your environment variables."
+    )
+
+client = genai.Client(api_key=_api_key)
 MODEL = "gemini-2.5-flash"
 
 PROMPT_TEMPLATE = """You are an elite CV writer and career strategist with 15 years of experience placing candidates at top companies across East Africa and globally. You write CVs and cover letters that actually get interviews — not generic templates.
